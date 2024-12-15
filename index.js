@@ -26,7 +26,26 @@ async function run() {
     const jobsCollection = client.db('jobsDB').collection('jobs');
 
     // jobs related apis
-    app.post('/jobs',async(req,res)=>{
+    // app.get('/job', async (req, res) => {
+    //   const email = req.query.email;
+    //   const query = {email}
+    //   const result = await jobsCollection.find(query).toArray();
+    //   res.send(result)
+    // })
+
+    app.get('/job/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = {email}
+      const result = await jobsCollection.find(query).toArray();
+      res.send(result)
+    })
+
+    app.get('/jobs', async (req, res) => {
+      const result = await jobsCollection.find().toArray();
+      res.send(result)
+    })
+
+    app.post('/jobs', async (req, res) => {
       const jobs = req.body
       const result = await jobsCollection.insertOne(jobs);
       res.send(result)
