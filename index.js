@@ -32,10 +32,16 @@ async function run() {
     //   const result = await jobsCollection.find(query).toArray();
     //   res.send(result)
     // })
+    app.get('/jobById/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await jobsCollection.findOne(query);
+      res.send(result)
+    })
 
     app.get('/job/:email', async (req, res) => {
       const email = req.params.email;
-      const query = {email}
+      const query = { email }
       const result = await jobsCollection.find(query).toArray();
       res.send(result)
     })
@@ -50,10 +56,10 @@ async function run() {
       const result = await jobsCollection.insertOne(jobs);
       res.send(result)
     })
-    
-    app.delete('/job/:id', async(req,res)=>{
+
+    app.delete('/job/:id', async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) }
       const result = await jobsCollection.deleteOne(query);
       res.send(result);
     })
