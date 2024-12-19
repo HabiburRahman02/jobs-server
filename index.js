@@ -24,6 +24,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const jobsCollection = client.db('jobsDB').collection('jobs');
+    const bidsCollection = client.db('jobsDB').collection('bids');
 
     // jobs related apis
     // app.get('/job', async (req, res) => {
@@ -57,15 +58,15 @@ async function run() {
       res.send(result)
     })
 
-    app.put('/job-update/:id',async(req,res)=>{
+    app.put('/job-update/:id', async (req, res) => {
       const id = req.params.id;
       const job = req.body;
-      const filter = {_id: new ObjectId(id)};
+      const filter = { _id: new ObjectId(id) };
       const options = { upsert: true };
       const updated = {
         $set: job
       }
-      const result = await jobsCollection.updateOne(filter, updated,options)
+      const result = await jobsCollection.updateOne(filter, updated, options)
       res.send(result)
     })
 
@@ -75,6 +76,36 @@ async function run() {
       const result = await jobsCollection.deleteOne(query);
       res.send(result);
     })
+
+
+    //  bids related apis
+    app.post('/bids', async (req, res) => {
+      const bids = req.body
+      const bid_id = bids.bid_id
+
+      // increase bid_count in jobs collection
+      const filter = { _id: new ObjectId(bid_id) }
+      const options = { upsert: true }
+      // const bidDetails = await jobsCollection.findOne(filter)
+      // console.log(bidDetails);
+      // let update;
+      // if(bidDetails.bid_count){
+      //    update = {$inc: { bid_count: 1 }}
+      // }
+      // else{
+      //    update = {$set: { bid_count: 1 }}
+      // }
+      const update = {
+        $inc: {
+          bid_count: 1
+        }
+      }
+      const firstResult = await jobsCollection.updateOne(filter, update)
+
+      const result = await bidsCollection.insertOne(bids);
+      res.send(result)
+    })
+
 
 
     // Send a ping to confirm a successful connection
