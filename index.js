@@ -81,7 +81,14 @@ async function run() {
     //  bids related apis
     app.get('/bids/:email', async (req, res) => {
       const email = req.params.email;
-      const filter = {email};
+      const filter = { email };
+      const result = await bidsCollection.find(filter).toArray();
+      res.send(result);
+    })
+
+    app.get('/bid-requests/:email', async (req, res) => {
+      const email = req.params.email;
+      const filter = { buyerEmail: email };
       const result = await bidsCollection.find(filter).toArray();
       res.send(result);
     })
@@ -90,11 +97,11 @@ async function run() {
       const bids = req.body
       const bid_id = bids.bid_id
       // if already bibs this job then return a a status
-      const query = {email: bids?.email, bid_id: bids.bid_id}
+      const query = { email: bids?.email, bid_id: bids.bid_id }
       const exist = await bidsCollection.find(query).toArray();
-      if(exist){
-        return res.status(400).send({message:'already bid this job post'})
-      }
+      // if(exist){
+      //   return res.status(400).send({message:'already bid this job post'})
+      // }
 
       // increase bid_count in jobs collection
       const filter = { _id: new ObjectId(bid_id) }
@@ -116,6 +123,20 @@ async function run() {
       const firstResult = await jobsCollection.updateOne(filter, update)
 
       const result = await bidsCollection.insertOne(bids);
+      res.send(result)
+    })
+
+    app.patch('/bid-status-update/:id', async (req, res) => {
+      const id = req.params.id;
+      const {status} = req.body;
+      console.log(status);
+      const query = { _id: new ObjectId(id) }
+      const update = {
+        $set: {
+          status: status
+        }
+      }
+      const result = await bidsCollection.updateOne(query,update);
       res.send(result)
     })
 
