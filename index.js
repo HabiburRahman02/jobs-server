@@ -79,9 +79,22 @@ async function run() {
 
 
     //  bids related apis
+    app.get('/bids/:email', async (req, res) => {
+      const email = req.params.email;
+      const filter = {email};
+      const result = await bidsCollection.find(filter).toArray();
+      res.send(result);
+    })
+
     app.post('/bids', async (req, res) => {
       const bids = req.body
       const bid_id = bids.bid_id
+      // if already bibs this job then return a a status
+      const query = {email: bids?.email, bid_id: bids.bid_id}
+      const exist = await bidsCollection.find(query).toArray();
+      if(exist){
+        return res.status(400).send({message:'already bid this job post'})
+      }
 
       // increase bid_count in jobs collection
       const filter = { _id: new ObjectId(bid_id) }
@@ -105,6 +118,7 @@ async function run() {
       const result = await bidsCollection.insertOne(bids);
       res.send(result)
     })
+
 
 
 
