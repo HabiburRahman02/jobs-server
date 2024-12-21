@@ -142,18 +142,27 @@ async function run() {
 
     // all jobs filter by categories asc, dsc and more
     app.get('/all-jobs', async (req, res) => {
-      const filterByCategory = req.query.filterByCategory;
-      const search = req.query.search;
+      const { filterByCategory, search, sort } = req.query;
       let query = {}
 
-      if(filterByCategory){
-        query.category =  filterByCategory
+      let sortOptions = {}
+      if (sort === 'asc') {
+        sortOptions.deadline = 1
       }
-      if(search){
-        query.job_title = {$regex: search, $options: 'i'}
+      else {
+        sortOptions.deadline = -1
       }
 
-      const result = await jobsCollection.find(query).toArray();
+      if (filterByCategory) {
+        query.category = filterByCategory
+      }
+      if (search) {
+        query.job_title = { $regex: search, $options: 'i' }
+      }
+
+      const result = await jobsCollection.find(query)
+        .sort(sortOptions)
+        .toArray();
       res.send(result)
     })
 
