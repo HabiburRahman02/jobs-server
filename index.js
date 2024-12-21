@@ -128,7 +128,7 @@ async function run() {
 
     app.patch('/bid-status-update/:id', async (req, res) => {
       const id = req.params.id;
-      const {status} = req.body;
+      const { status } = req.body;
       console.log(status);
       const query = { _id: new ObjectId(id) }
       const update = {
@@ -136,10 +136,26 @@ async function run() {
           status: status
         }
       }
-      const result = await bidsCollection.updateOne(query,update);
+      const result = await bidsCollection.updateOne(query, update);
       res.send(result)
     })
 
+    // all jobs filter by categories asc, dsc and more
+    app.get('/all-jobs', async (req, res) => {
+      const filterByCategory = req.query.filterByCategory;
+      const search = req.query.search;
+      let query = {}
+
+      if(filterByCategory){
+        query.category =  filterByCategory
+      }
+      if(search){
+        query.job_title = {$regex: search, $options: 'i'}
+      }
+
+      const result = await jobsCollection.find(query).toArray();
+      res.send(result)
+    })
 
 
 
